@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import ru.byprogminer.sasearch.savkobundle.api.v1.controllers.ImagesController
 import ru.byprogminer.sasearch.savkobundle.enitities.ImageEntity
+import ru.byprogminer.sasearch.savkobundle.enitities.UserImageEntity
 import ru.byprogminer.sasearch.savkobundle.repositories.ImagesRepository
 import ru.byprogminer.sasearch.savkobundle.repositories.UsersImagesRepository
 import java.nio.file.Files
@@ -30,6 +31,9 @@ constructor(
 
     operator fun get(id: String): ImageEntity = repository.findById(id).get()
 
+    fun search(userId: String, query: List<String>) = query
+            .map { "%$it%" }.map { repository.search(userId, it) }
+
     fun add(userId: String, image: MultipartFile): String {
         val id = UUID.randomUUID().toString()
 
@@ -38,6 +42,7 @@ constructor(
 
         ImageIO.write(ImageIO.read(image.inputStream), "JPEG", path.toFile())
         repository.save(ImageEntity(id, "", "", "", ""))
+        usersImagesRepository.save(UserImageEntity(userId, id))
 
         // TODO work with hash
         // TODO auto-set title, colors, theme, objects

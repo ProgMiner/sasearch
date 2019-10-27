@@ -7,10 +7,7 @@ import org.springframework.web.multipart.MultipartFile
 import ru.byprogminer.sasearch.savkobundle.api.v1.dto.ImageDto
 import ru.byprogminer.sasearch.savkobundle.services.ImagesService
 import ru.byprogminer.sasearch.savkobundle.tryToBoolean
-import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.*
 
 @RestController
 class ImagesController
@@ -43,6 +40,9 @@ constructor(private val service: ImagesService) {
         e.printStackTrace()
         "null"
     }
+
+    @PostMapping(path = ["/api/v1/images/search/user/{userId}"])
+    fun search(@PathVariable userId: String, @RequestBody query: List<String>) = service.search(userId, query)
 
     @GetMapping(path = ["/api/v1/images/load/image/{id}"],
             produces = [MediaType.TEXT_PLAIN_VALUE, MediaType.IMAGE_JPEG_VALUE])
