@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 import ru.byprogminer.sasearch.savkobundle.api.v1.dto.VkAlbumDto
 import ru.byprogminer.sasearch.savkobundle.services.VkAlbumsService
+import ru.byprogminer.sasearch.savkobundle.tryToBoolean
 
 @RestController
 class VkAlbumsController
@@ -15,39 +16,21 @@ class VkAlbumsController
 constructor(private val service: VkAlbumsService) {
 
     @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/vk/albums/get/user/{userId}"])
-    fun getByUser(@PathVariable userId: Int) = service[userId].map { VkAlbumDto(it.userId, it.albumId, it.sync) }
+    fun getByUser(@PathVariable userId: Int) = service[userId].map { VkAlbumDto(it.userId, it.id, it.sync) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/vk/albums/add/user/{userId}/album/{albumId}"])
-    fun addToUser(@PathVariable userId: Int, @PathVariable albumId: Int) =
-            try {
-                service.add(userId, albumId)
-                true
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                false
-            }
+    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/vk/albums/add/user/{userId}/album/{id}"])
+    fun addToUser(@PathVariable userId: Int, @PathVariable id: Int) =
+            tryToBoolean<Throwable> { service.add(userId, id) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/vk/albums/remove/user/{userId}/album/{albumId}"])
-    fun removeFromUser(@PathVariable userId: Int, @PathVariable albumId: Int) =
-            try {
-                service.remove(userId, albumId)
-                true
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                false
-            }
+    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/vk/albums/remove/user/{userId}/album/{id}"])
+    fun removeFromUser(@PathVariable userId: Int, @PathVariable id: Int) =
+            tryToBoolean<Throwable> { service.remove(userId, id) }
 
     @RequestMapping(method = [RequestMethod.GET],
-            path = ["/api/v1/vk/albums/set/user/{userId}/album/{albumId}/synchronization/{sync}"])
+            path = ["/api/v1/vk/albums/set/user/{userId}/album/{id}/synchronization/{sync}"])
     fun setSynchronization(
             @PathVariable userId: Int,
-            @PathVariable albumId: Int,
+            @PathVariable id: Int,
             @PathVariable sync: Boolean
-    ) = try {
-        service.setSynchronization(userId, albumId, sync)
-        true
-    } catch (e: Throwable) {
-        e.printStackTrace()
-        false
-    }
+    ) = tryToBoolean<Throwable> { service.setSynchronization(userId, id, sync) }
 }
