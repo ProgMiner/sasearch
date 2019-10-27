@@ -5,10 +5,6 @@ import com.vk.api.sdk.client.actors.GroupActor
 import com.vk.api.sdk.httpclient.HttpTransportClient
 import java.util.*
 
-private const val VK_APP_ID = 7184777
-private const val VK_APP_SECURE = "1vUO0aZEpdel4VdFtWlP"
-private const val VK_APP_SERVICE = "e990f536e990f536e990f53667e9fd54bfee990e990f536b424c6454b262de901e81eca"
-
 private const val VK_GROUP_ID = 188012899
 private const val VK_GROUP_TOKEN = "4d41b6ec2d0c8475bb48d262be835c105d9e35259b510a475c4c723362ffb0298012d72cd8d9d42d59011"
 
