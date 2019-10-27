@@ -2,14 +2,15 @@ package ru.byprogminer.sasearch.savkobundle.api.v1.controllers
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import ru.byprogminer.sasearch.savkobundle.api.v1.dto.ImageDto
 import ru.byprogminer.sasearch.savkobundle.services.ImagesService
 import ru.byprogminer.sasearch.savkobundle.tryToBoolean
+import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.*
 
 @RestController
 class ImagesController
@@ -29,12 +30,12 @@ constructor(private val service: ImagesService) {
         internal fun hashPath(id: String) = HASHES_PATH + id.replace('-', '/') + ".jpg"
     }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/get/user/{userId}"])
+    @GetMapping(path = ["/api/v1/images/get/user/{userId}"])
     fun getByUser(@PathVariable userId: String) = service.getByUser(userId).map { entity ->
         ImageDto(entity.id, entity.title, parseStringSet(entity.colors),
                 parseStringSet(entity.themes), parseStringSet(entity.objects)) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/get/image/{id}"])
+    @GetMapping(path = ["/api/v1/images/get/image/{id}"])
     fun get(@PathVariable id: String) = try {
         service[id].let { ImageDto(it.id, it.title, parseStringSet(it.colors),
                 parseStringSet(it.themes), parseStringSet(it.objects)) }
@@ -43,11 +44,8 @@ constructor(private val service: ImagesService) {
         "null"
     }
 
-    @RequestMapping(
-            method = [RequestMethod.GET],
-            path = ["/api/v1/images/load/image/{id}"],
-            produces = [MediaType.TEXT_PLAIN_VALUE, MediaType.IMAGE_JPEG_VALUE]
-    )
+    @GetMapping(path = ["/api/v1/images/load/image/{id}"],
+            produces = [MediaType.TEXT_PLAIN_VALUE, MediaType.IMAGE_JPEG_VALUE])
     fun load(@PathVariable id: String) = try {
         FileInputStream(imagePath(id)).readBytes()
     } catch (e: Throwable) {
@@ -55,31 +53,34 @@ constructor(private val service: ImagesService) {
         "null"
     }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/set/image/{id}/title/{title}"])
+    @PostMapping(path = ["/api/v1/images/add/user/{userId}"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun add(@PathVariable userId: String, @RequestParam image: MultipartFile) = service.add(userId, image)
+
+    @GetMapping(path = ["/api/v1/images/set/image/{id}/title/{title}"])
     fun setTitle(@PathVariable id: String, @PathVariable title: String) =
             tryToBoolean<Throwable> { service.setTitle(id, title) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/add/image/{id}/color/{color}"])
+    @GetMapping(path = ["/api/v1/images/add/image/{id}/color/{color}"])
     fun addColor(@PathVariable id: String, @PathVariable color: String) =
             tryToBoolean<Throwable> { service.addColor(id, color) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/remove/image/{id}/color/{color}"])
+    @GetMapping(path = ["/api/v1/images/remove/image/{id}/color/{color}"])
     fun removeColor(@PathVariable id: String, @PathVariable color: String) =
             tryToBoolean<Throwable> { service.removeColor(id, color) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/add/image/{id}/theme/{theme}"])
+    @GetMapping(path = ["/api/v1/images/add/image/{id}/theme/{theme}"])
     fun addTheme(@PathVariable id: String, @PathVariable theme: String) =
             tryToBoolean<Throwable> { service.addTheme(id, theme) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/remove/image/{id}/theme/{theme}"])
+    @GetMapping(path = ["/api/v1/images/remove/image/{id}/theme/{theme}"])
     fun removeTheme(@PathVariable id: String, @PathVariable theme: String) =
             tryToBoolean<Throwable> { service.removeTheme(id, theme) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/add/image/{id}/object/{object}"])
+    @GetMapping(path = ["/api/v1/images/add/image/{id}/object/{object}"])
     fun addObject(@PathVariable id: String, @PathVariable `object`: String) =
             tryToBoolean<Throwable> { service.addObject(id, `object`) }
 
-    @RequestMapping(method = [RequestMethod.GET], path = ["/api/v1/images/remove/image/{id}/object/{object}"])
+    @GetMapping(path = ["/api/v1/images/remove/image/{id}/object/{object}"])
     fun removeObject(@PathVariable id: String, @PathVariable `object`: String) =
             tryToBoolean<Throwable> { service.removeObject(id, `object`) }
 }
